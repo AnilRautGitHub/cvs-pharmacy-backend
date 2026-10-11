@@ -21,6 +21,7 @@ import { GraphQLModule } from '@nestjs/graphql';
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: true,
+      includeStacktraceInErrorResponses: false,
     }),
     ProductsModule,
   ],

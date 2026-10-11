@@ -3,8 +3,11 @@ import { ProductsService } from './products.service.js';
 import { ProductType } from './graphql/product.type.js';
 import { CreateProductInput } from './graphql/create-product.input.js';
 import { UpdateProductInput } from './graphql/update-product.input.js';
+import { UseFilters } from '@nestjs/common';
+import { GraphqlExceptionFilter } from '../common/filters/graphql-exception.filter.js';
 
 @Resolver(() => ProductType)
+@UseFilters(GraphqlExceptionFilter)
 export class ProductsResolver {
   constructor(private readonly productsService: ProductsService) {}
 
