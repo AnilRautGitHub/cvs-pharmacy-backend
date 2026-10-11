@@ -4,6 +4,8 @@ import { AppService } from './app.service.js';
 import { ProductsModule } from './products/products.module.js';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { GraphQLModule } from '@nestjs/graphql';
 
 @Module({
   imports: [
@@ -15,6 +17,11 @@ import { MongooseModule } from '@nestjs/mongoose';
       useFactory: (config: ConfigService) => ({
         uri: config.getOrThrow<string>('MONGODB_URI'),
       }),
+    }),
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      driver: ApolloDriver,
+      autoSchemaFile: true,
+      includeStacktraceInErrorResponses: false,
     }),
     ProductsModule,
   ],

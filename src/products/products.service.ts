@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { CreateProductDto } from './dto/create-product.dto.js';
 import { Product } from './schemas/product.schema.js';
+import { UpdateProductInput } from './graphql/update-product.input.js';
 
 @Injectable()
 export class ProductsService {
@@ -36,5 +37,39 @@ export class ProductsService {
 
   async createProduct(createProductDto: CreateProductDto) {
     return this.productModel.create(createProductDto);
+  }
+
+  async updateProduct(id: string, input: UpdateProductInput) {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new NotFoundException(`Invalid product ID: ${id}`);
+    }
+
+    const updatedProduct = await this.productModel
+      .findByIdAndUpdate(
+        id,
+        { $set: input },
+        { new: true, runValidators: true },
+      )
+      .exec();
+
+    if (!updatedProduct) {
+      throw new NotFoundException(`Product not found: ${id}`);
+    }
+
+    return updatedProduct;
+  }
+
+  async deleteProduct(id: string): Promise<boolean> {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new NotFoundException(`Invalid product ID: ${id}`);
+    }
+
+    const deletedProduct = await this.productModel.findByIdAndDelete(id).exec();
+
+    if (!deletedProduct) {
+      throw new NotFoundException(`Product not found: ${id}`);
+    }
+
+    return true;
   }
 }
