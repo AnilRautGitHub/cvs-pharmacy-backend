@@ -127,7 +127,10 @@ describe('ProductsService', () => {
       expect(mockProductModel.findByIdAndUpdate).toHaveBeenCalledWith(
         validId,
         { $set: updateInput },
-        { new: true, runValidators: true },
+        {
+          returnDocument: 'after',
+          runValidators: true,
+        },
       );
     });
 

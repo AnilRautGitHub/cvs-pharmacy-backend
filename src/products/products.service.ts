@@ -48,7 +48,7 @@ export class ProductsService {
       .findByIdAndUpdate(
         id,
         { $set: input },
-        { new: true, runValidators: true },
+        { returnDocument: 'after', runValidators: true },
       )
       .exec();
 

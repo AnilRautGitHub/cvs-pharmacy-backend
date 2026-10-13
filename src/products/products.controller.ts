@@ -1,10 +1,14 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ProductsService } from './products.service.js';
 import { CreateProductDto } from './dto/create-product.dto.js';
-
+import { InventoryClientService } from './inventory-client.service.js';
+import { ReserveInventoryDto } from './dto/reserve-inventory.dto.js';
 @Controller('products')
 export class ProductsController {
-  constructor(private readonly productsService: ProductsService) {}
+  constructor(
+    private readonly productsService: ProductsService,
+    private readonly inventoryClient: InventoryClientService,
+  ) {}
 
   @Get()
   findAll() {
@@ -19,5 +23,18 @@ export class ProductsController {
   @Post()
   createProduct(@Body() createProductDto: CreateProductDto) {
     return this.productsService.createProduct(createProductDto);
+  }
+
+  @Get(':id/inventory')
+  async getInventory(@Param('id') id: string) {
+    return this.inventoryClient.getStock(id);
+  }
+
+  @Post(':id/inventory/reserve')
+  async reserveInventory(
+    @Param('id') id: string,
+    @Body() body: ReserveInventoryDto,
+  ) {
+    return this.inventoryClient.reserveStock(id, body.quantity);
   }
 }
