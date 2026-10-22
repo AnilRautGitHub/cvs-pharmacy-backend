@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom, timeout, catchError, throwError } from 'rxjs';
+import { CreateReservationDto } from '../inventory/dto/create-reservation.dto.js';
 
 export interface InventoryResponse {
   productId: string;
@@ -108,6 +109,63 @@ export class InventoryClientService {
             );
           }),
         ),
+    );
+  }
+
+  async releaseStock(
+    productId: string,
+    quantity: number,
+  ): Promise<ReservationResponse> {
+    return firstValueFrom(
+      this.client
+        .send<ReservationResponse>('inventory.release_stock', {
+          productId,
+          quantity,
+        })
+        .pipe(
+          timeout(3000),
+          catchError((error: unknown) => {
+            const rpcError = error as {
+              statusCode?: number;
+              message?: string;
+            };
+
+            const statusCode = rpcError?.statusCode;
+
+            if (
+              statusCode === 400 ||
+              statusCode === 404 ||
+              statusCode === 409
+            ) {
+              return throwError(
+                () =>
+                  new HttpException(
+                    rpcError.message ?? 'Inventory release failed',
+                    statusCode,
+                  ),
+              );
+            }
+
+            return throwError(
+              () =>
+                new ServiceUnavailableException(
+                  'Inventory service is unavailable',
+                ),
+            );
+          }),
+        ),
+    );
+  }
+
+  async createReservation(data: CreateReservationDto) {
+    return firstValueFrom(
+      this.client.send('inventory.create_reservation', data).pipe(
+        timeout(3000),
+        catchError((error: unknown) => {
+          // Reuse your existing RPC-to-HTTP error mapping here.
+          return throwError(() => error);
+        }),
+      ),
     );
   }
 }

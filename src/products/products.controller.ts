@@ -1,8 +1,9 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, Post } from '@nestjs/common';
 import { ProductsService } from './products.service.js';
 import { CreateProductDto } from './dto/create-product.dto.js';
 import { InventoryClientService } from './inventory-client.service.js';
 import { ReserveInventoryDto } from './dto/reserve-inventory.dto.js';
+import { CreateReservationDto } from '../inventory/dto/create-reservation.dto.js';
 @Controller('products')
 export class ProductsController {
   constructor(
@@ -36,5 +37,26 @@ export class ProductsController {
     @Body() body: ReserveInventoryDto,
   ) {
     return this.inventoryClient.reserveStock(id, body.quantity);
+  }
+
+  @Post(':id/inventory/release')
+  @HttpCode(200)
+  async releaseInventory(
+    @Param('id') id: string,
+    @Body() body: ReserveInventoryDto,
+  ) {
+    return this.inventoryClient.releaseStock(id, body.quantity);
+  }
+
+  @Post(':id/inventory/reservations')
+  @HttpCode(200)
+  async createReservation(
+    @Param('id') productId: string,
+    @Body() body: CreateReservationDto,
+  ) {
+    return this.inventoryClient.createReservation({
+      ...body,
+      productId,
+    });
   }
 }

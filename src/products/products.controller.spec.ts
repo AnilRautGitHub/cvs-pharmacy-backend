@@ -17,6 +17,7 @@ describe('ProductsController', () => {
   const mockInventoryClient = {
     getStock: vi.fn(),
     reserveStock: vi.fn(),
+    releaseStock: vi.fn(),
   };
 
   beforeEach(async () => {
@@ -97,5 +98,26 @@ describe('ProductsController', () => {
     expect(result).toEqual(reservation);
 
     expect(mockInventoryClient.reserveStock).toHaveBeenCalledWith(productId, 5);
+  });
+
+  it('should release stock through InventoryClientService', async () => {
+    const productId = '6acadc5fa5b74332acefba4d';
+
+    const releasedInventory = {
+      productId,
+      quantity: 120,
+      reserved: 15,
+      availableStock: 105,
+    };
+
+    mockInventoryClient.releaseStock.mockResolvedValue(releasedInventory);
+
+    const result = await controller.releaseInventory(productId, {
+      quantity: 5,
+    });
+
+    expect(result).toEqual(releasedInventory);
+
+    expect(mockInventoryClient.releaseStock).toHaveBeenCalledWith(productId, 5);
   });
 });
